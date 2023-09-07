@@ -6,11 +6,12 @@ import (
 )
 
 type Video struct {
-	ID string `valid:"uuid"` //indica para o go validator qual é o tipo do campo
+	ID string `json:"encoded_video_folder" valid:"uuid" gorm:"type:uuid;primary_key"` //indica para o go validator qual é o tipo do campo
 	//identificacao do servico que enviou o video ResourceID
-	ResourceID string `valid:"notnull"`
-	FilePath string `valid:"notnull"`
-	CreatedAt time.Time `valid:"-"`
+	ResourceID string `json:"resource_id" valid:"notnull" gorm:"type:varchar(255)"`
+	FilePath string `json:"file_path" valid:"notnull" gorm:"type:varchar(255)"`
+	CreatedAt time.Time `json:"-" valid:"-"`
+	Jobs []*Job `json:"-" valid:"-" gorm:"ForeignKey:VideoID"`// VideoID da entidade job 
 }
 
 //roda antes do que qualquer coisa no go
