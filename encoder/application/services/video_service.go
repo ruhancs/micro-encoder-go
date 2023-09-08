@@ -5,6 +5,9 @@ import (
 	"encoder/application/repositories"
 	"encoder/domain"
 	"io"
+	"os/exec"
+
+	//"io/ioutil"
 	"log"
 	"os"
 
@@ -60,4 +63,33 @@ func (v *VideoService) Download(bucketName string) error {
 	log.Printf("video %v has been storage", v.Video.ID)
 
 	return nil
+}
+
+//executar comando no sytema op para executar o bento4 e fragmentar o video
+func (v *VideoService) Fragment() error {
+	//criar pasta para enviar o video fragmentado
+	err := os.Mkdir(os.Getenv("localstoragePath") + "/" + v.Video.ID, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	//de onde vem o video e para onde sera enviado
+	source := os.Getenv("localstoragePath") + "/" + v.Video.ID + ".mp4"
+	target := os.Getenv("localstoragePath") + "/" + v.Video.ID + ".frag"
+
+	//executar o bento4 para fragmentar o video
+	cmd := exec.Command("mp4fragment",source,target)
+	output,err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	printOutput(output)
+	return nil
+}
+
+func printOutput(output []byte) {
+	if len(output) > 0 {
+		log.Printf("=====> Output: %s\n", string(output))
+	}
 }
