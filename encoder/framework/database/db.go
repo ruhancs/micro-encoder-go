@@ -44,6 +44,7 @@ func (d *Database) Connect() (*gorm.DB, error) {
 	var err error
 	if d.Env != "test" {
 		d.Db, err = gorm.Open(d.DbType, d.Dsn)
+		//d.Db.Raw("PRAGMA foreign_keys=ON")
 	} else {
 		d.Db, err = gorm.Open(d.DbtypeTest,d.DsnTest)
 	}
