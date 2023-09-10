@@ -78,7 +78,9 @@ func(j *JobManager) Start(ch *amqp.Channel) {
 }
 
 func (j *JobManager) notifySuccess(jobResult JobWorkerResult, ch *amqp.Channel) error {
+	Mutex.Lock()
 	jobJson, err := json.Marshal(jobResult.Job)//resultado do jobResult em json
+	Mutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -101,9 +103,10 @@ func (j *JobManager) notifySuccess(jobResult JobWorkerResult, ch *amqp.Channel) 
 func (j *JobManager) checkParserErrors(jobResult JobWorkerResult) error {
 	if jobResult.Job.ID != "" {
 		//id da msg do rabbitmq jobResult.Message.DeliveryTag
-		log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Error parsing job: #{jobResult.Job.ID}")
+		log.Printf("MessageID: %v. Error parsing job: %v with video: %v. Error: %v",
+			jobResult.Message.DeliveryTag,jobResult.Job.ID,jobResult.Job.Video.ID,jobResult.Error.Error())
 		} else {
-			log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Error parsing message job: #{jobResult.Error}")
+			log.Printf("MessageID: %v. Error parsing message job: %v", jobResult.Message.DeliveryTag, jobResult.Error)
 	}
 
 	errMSG := JobNotificationError{

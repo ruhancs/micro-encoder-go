@@ -5,6 +5,7 @@ import (
 	"encoder/framework/utils"
 	"encoding/json"
 	"os"
+	"sync"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -18,6 +19,9 @@ type JobWorkerResult struct {
 	Message *amqp.Delivery
 	Error error
 }
+
+//variavel para evitar race condition entre os workers
+var Mutex = &sync.Mutex{}
 
 func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResult, jobService JobService, job domain.Job, workerID int) {
 
@@ -39,11 +43,15 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 			continue
 		}
 
+		Mutex.Lock() // travar a operacao jobService.VideoService.Video.ID para evitar race condition
+
 		//quando receber a message.body que contem resource_id e file_path,
 		//preenche o jobservice os valores em video de resource_id e file_path
 		err = json.Unmarshal(message.Body, &jobService.VideoService.Video)
 		//criar id do video
 		jobService.VideoService.Video.ID = uuid.NewV4().String()
+		Mutex.Unlock()//apos executado destravar para os outros workers
+
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
@@ -56,8 +64,10 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 			continue
 		}
 		
+		Mutex.Lock()
 		//inserir video no db
 		err = jobService.VideoService.InsertVideo()
+		Mutex.Unlock()
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
@@ -70,8 +80,10 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 		job.Status = "STARTING"
 		job.CreatedAt = time.Now()
 
+		Mutex.Lock()
 		//inserir o job no db
 		_, err = jobService.JobRepository.Insert(&job)
+		Mutex.Unlock()
 		if err != nil {
 			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
