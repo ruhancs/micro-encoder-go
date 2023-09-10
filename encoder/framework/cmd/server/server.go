@@ -12,13 +12,15 @@ import (
 	"github.com/streadway/amqp"
 )
 
-//criar no rabbitmq exchange dlx para receber msg rejeitadas
+//criar no rabbitmq exchange dlx para receber msg rejeitadas, exchange deve ter o type fanout
 //criar fila com binding em dlx para pegar os resultados das falhas de processamento
 
 //criar fila para enviar os resultados do processamento de videos
 //fazer binding da fila criada com amq.direct e inserir a Routing key = jobs
 
 //fila de videos é criada automaticamente, fila para consumir os dados do video para processar
+
+//detectar race condition: go run -race framework/cmd/server/server.go
 
 var db database.Database
 
