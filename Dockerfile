@@ -8,6 +8,7 @@ RUN apk add --update ffmpeg bash curl make
 
 # Install Bento
 WORKDIR /tmp/bento4
+#http://zebulon.bok.net/Bento4/source/Bento4-SRC-1-5-0-615.zip
 ENV BENTO4_BASE_URL="http://zebulon.bok.net/Bento4/source/" \
     BENTO4_VERSION="1-5-0-615" \
     BENTO4_CHECKSUM="5378dbb374343bc274981d6e2ef93bce0851bda1" \
@@ -23,11 +24,11 @@ RUN apk add --update --upgrade curl python3 unzip bash gcc g++ scons && \
     rm -rf Bento4-${BENTO4_TYPE}-${BENTO4_VERSION}${BENTO4_TARGET}.zip && \
     apk del unzip 
     # don't do these steps if using binary install
-    # cd ${BENTO4_PATH} && scons -u build_config=Release target=x86_64-unknown-linux && \
-    # cp -R ${BENTO4_PATH}/Build/Targets/x86_64-unknown-linux/ ${BENTO4_PATH}/bin && \
-    # cp -R ${BENTO4_PATH}/Source/Python/utils ${BENTO4_PATH}/utils && \
-    # cp -a ${BENTO4_PATH}/Source/Python/wrappers/. ${BENTO4_PATH}/bin
+    #cd ${BENTO4_PATH} && scons -u build_config=Release target=x86_64-unknown-linux && \
+    #cp -R ${BENTO4_PATH}/Build/Targets/x86_64-unknown-linux/ ${BENTO4_PATH}/bin && \
+    #cp -R ${BENTO4_PATH}/Source/Python/utils ${BENTO4_PATH}/utils && \
+    #cp -a ${BENTO4_PATH}/Source/Python/wrappers/. ${BENTO4_PATH}/bin
 
 WORKDIR /go/src
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["top"]

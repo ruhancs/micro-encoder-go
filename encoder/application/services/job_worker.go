@@ -19,7 +19,7 @@ type JobWorkerResult struct {
 	Error error
 }
 
-func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResult, jobService JobService, workerID int, job domain.Job) {
+func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResult, jobService JobService, job domain.Job, workerID int) {
 
 	//padrao do json recebido na queue
 	//{
@@ -27,9 +27,8 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 		//file_path: caminho do video na bucket
 	//}
 	
-	
-	//ler a messageChannel que é recebida no canal que contem o video que se quer converter
-	//messageChannel contem resourceID e video
+	//ler o messageChannel, que é recebida no canal que contem o video que se quer converter
+	//messageChannel contem resourceID e video, e vem do rabbitmq
 	for message := range messageChannel {
 		//pegar msg do body do json
 		//validar se o json é valido
@@ -40,7 +39,7 @@ func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResul
 			continue
 		}
 
-		//quando receber a message que contem resource_id e file_path,
+		//quando receber a message.body que contem resource_id e file_path,
 		//preenche o jobservice os valores em video de resource_id e file_path
 		err = json.Unmarshal(message.Body, &jobService.VideoService.Video)
 		//criar id do video
